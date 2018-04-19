@@ -41,6 +41,8 @@ bool cal = true;
 /******** I2C Communication ***********/
 #define ANSWERSIZE 5
 #define ADDRESS 0x03
+
+/************** Serial Communication *************/
 #define DEVICE_NAME "dev1"
 
 /******** LED ***********/
@@ -123,11 +125,7 @@ enum command {
 };
 
 //ENUM For acknowledgement  og negative-acknowledgement
-enum acknowlagement {
-  ACK = 1,
-  NACK = 0
-};
-
+enum acknowlagement {ACK = 1, NACK = 0};
 //ENUM for color on leds
 enum RGBEnum {R = 0, G = 1, B = 2};
 
