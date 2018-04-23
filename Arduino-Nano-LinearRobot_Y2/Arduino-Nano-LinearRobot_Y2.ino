@@ -3,9 +3,9 @@
 #include <FastLED.h>
 
 //Debug flag
-bool debug = true;
-bool calibTest = true;
-bool cal = true;
+bool debug = false;
+bool calibTest = false;
+bool cal = false;
 
 /******** Stepper ***********/
 /******** IO ***********/
@@ -23,7 +23,7 @@ bool cal = true;
 #define Y_OUTER_SWITCH A0
 
 /******** MAGNET ***********/
-#define MAGNET_PIN 10
+#define MAGNET_PIN 9
 #define MAGNET_ENDSTOP A6
 
 /******** DIRECTIONS ***********/
@@ -60,7 +60,7 @@ CRGBPalette16 currentPalette;
 short ledRGB[] = {0, 0, 0};
 
 //Default stepper speed
-int stepSpeed[] = {50 , 50};
+int stepSpeed[] = {120 , 120};
 
 //Travelled distance
 int travelledDistance;
@@ -117,6 +117,7 @@ enum command {
   // Genral Cmd
   moveRobotTo = 0x05,
   moveRobot = 0x06,
+  findTray  = 0x07,
   doCalibrate = 0x10,
   turnOnLight = 0x11,
   changeColor = 0x12,
@@ -132,7 +133,9 @@ enum command {
 };
 
 //ENUM For acknowledgement  og negative-acknowledgement
-enum acknowlagement {ACK = 1, NACK = 0};
+const byte ACK = 1;
+const byte NACK = 0;
+//enum acknowlagement {ACK = 1, NACK = 0};
 //ENUM for color on leds
 enum RGBEnum {R = 0, G = 1, B = 2};
 //ENUM for axiz
@@ -146,11 +149,7 @@ enum command recieveCommand;    //Switch case command for the RECIEVE command, r
 
 void setup() {
 
-  Serial.begin(19200);
-  while (!Serial) {
-    ;// wait for serial port to connect. Needed for native USB port only
-  }
-
+  Serial.begin(9600);
 
   if (debug)
   {
@@ -178,7 +177,7 @@ void setup() {
   /******** MAGNET ***********/
   pinMode(MAGNET_PIN, OUTPUT);
   pinMode(MAGNET_ENDSTOP, INPUT);
-
+  pinMode(13, OUTPUT);
   /******** ENABLE SIGNAL ***********/
   pinMode(MOTOR_ENABLE, OUTPUT);
 
@@ -204,8 +203,9 @@ void setup() {
   if (debug) {
     Serial.println(F("Setup complete"));
   }
-}
 
+  mainCommand = idle;
+}
 //-------------------------------------------------------------------------------------------------------
 
 
@@ -221,7 +221,7 @@ void loop()
     case idle:
       inState = readyToRecieve;
       if (debug) {
-        delay(1000);
+        // delay(10);
         Serial.println(F("Main: Idle"));
       }
       receiveSerialEvent();
@@ -244,6 +244,7 @@ void loop()
       //Check if robot needs to move
       if (!robotInPosition()) // Returns true if the robot is in position
       {
+
         //Move the robot in desired steps. IF this is false, then it was not possible to move
         if (!moveStep(newPos.x, newPos.y))
         {
@@ -262,9 +263,8 @@ void loop()
     //Calibrate the robot
     case moveRobot:
       if (debug) {
-        Serial.println(F("Main: Move robot "));
+        Serial.println(F("Main: MOVE ROBOT IS NOT IN USE  "));
       }
-
       mainCommand = idle;
       break;
 
@@ -286,14 +286,12 @@ void loop()
       }
       /** TODO: MOVE ROBOT TO CENTER OF AREA **/
       //      // Move to senter of area
-      //      newPos.x = (maxPos.x / 2);
-      //      newPos.y = (maxPos.y / 2);
-      //      mainCommand = moveRobot
-
-      mainCommand = idle;
+      newPos.x = (maxPos.x / 2);
+      newPos.y = (maxPos.y / 2);
+      mainCommand = moveRobotTo;
       break;
 
-    //Turns magnet ON 
+    //Turns magnet ON
     case magnetOn:
       if (debug) {
         Serial.println(F("Main: magnetOn"));
@@ -311,6 +309,20 @@ void loop()
       }
       magnetOFF();
       mainCommand = idle;
+      break;
+
+
+    //Turns magnet OFF
+    case findTray:
+      if (debug) {
+        Serial.println(F("Main: find tray "));
+      }
+      if (!moveToTray()) {
+        mainCommand = failure;
+      } else {
+        mainCommand = idle;
+      }
+
       break;
 
 
@@ -340,8 +352,10 @@ void loop()
     //-------------------------------------------------------------------------
     //Set the command for calibrating the robot.
     case changeColor:
+      if (debug) {
+        Serial.println(F("Main: Change colors on led"));
+      }
       inState = busy; // When in an opperation state is busy.
-      Serial.println(F("Main: Change colors on led"));
       setLedColor(ledRGB[R], ledRGB[G], ledRGB[B]);
       mainCommand = idle;
       break;
@@ -350,8 +364,10 @@ void loop()
     //-------------------------------------------------------------------------
     //Set the command for calibrating the robot.
     case discoLight:
+      if (debug) {
+        Serial.println(F("Main: Disco mode"));
+      }
       inState = busy; // When in an opperation state is busy.
-      Serial.println(F("Main: Disco mode"));
       ledDiscoShow();
       mainCommand = idle;
       break;
@@ -360,7 +376,9 @@ void loop()
 
 
     default:
-      Serial.println(F("In default"));
+      if (debug) {
+        Serial.println(F("In default"));
+      }
       break;
       //--------------------------------------------------------------------------------------------------
   }

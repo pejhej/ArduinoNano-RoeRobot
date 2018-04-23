@@ -21,7 +21,9 @@
 
 void stopMotors() {
   inState = stopped;
-  Serial.println("stopped"); 
+  if (debug) {
+    Serial.println("stopped");
+  }
 }
 
 

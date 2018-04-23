@@ -65,7 +65,7 @@ boolean moveStep(int newX, int newY) {
       if (moveYPossible(dirY()))
       {
         moveYMotor(dirY()); //moves one step and increases currentpos
-        
+
       }
       else
       {
@@ -276,5 +276,31 @@ boolean moveYPossible(int dir)
 }
 
 
+
+
+/*Find tray fuction moves the robot i posetive Y direction (Increase)
+  until the tray is found.
+  The Tray is found when the MAGNET_ENDSTOP turns low.
+  Returns true if tray is found and false if endstop it detected.
+  if endstop detekted inState is changed enstopTrigged state by  the checkFailure();
+*/
+
+boolean moveToTray() {
+  //Enable motors
+  enableMotors();
+  bool trayFound = false;
+  printEndstopsString();
+  while (!limitTrigged() && ATDConverter(MAGNET_ENDSTOP)) {
+    moveYMotor(INC_DIR);
+    if (!ATDConverter(MAGNET_ENDSTOP)) {
+      trayFound = true;
+    }
+    if (limitTrigged()) {
+      trayFound = false;
+      inState = checkFailure();
+    }
+  }
+  return trayFound;
+}
 
 
