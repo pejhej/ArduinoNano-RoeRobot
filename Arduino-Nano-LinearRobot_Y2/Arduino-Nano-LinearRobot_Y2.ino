@@ -210,7 +210,8 @@ void setup() {
 
 
 void loop()
-{
+{      
+  receiveSerialEvent();
 
   //Switch command for the main loop
   //--------------------------------------------------------------------------------------------------
@@ -224,12 +225,10 @@ void loop()
         // delay(10);
         Serial.println(F("Main: Idle"));
       }
-      receiveSerialEvent();
       inState = readyToRecieve;
       //Enable motors
       disableMotors();
       //Set state to idle
-
       break;
 
 
@@ -241,7 +240,7 @@ void loop()
       //Do a check to see if robot needs to move
       //Make movestep check endstop in between every step, and then return true if moving was succesfull without hitting endstops
 
-      //Check if robot needs to move
+      //Check if robot needs to move of if the stop interrupt has been trigged. 
       if (!robotInPosition()) // Returns true if the robot is in position
       {
 
@@ -250,23 +249,11 @@ void loop()
         {
           mainCommand = failure;
         }
-      }
-      else
-      {
-
+      } else {
         mainCommand = idle;
       }
       break;
 
-
-
-    //Calibrate the robot
-    case moveRobot:
-      if (debug) {
-        Serial.println(F("Main: MOVE ROBOT IS NOT IN USE  "));
-      }
-      mainCommand = idle;
-      break;
 
 
     //Calibrate the robot
@@ -322,11 +309,10 @@ void loop()
       } else {
         mainCommand = idle;
       }
-
       break;
 
 
-    //Emergency stop
+    // stop
     case stopRoebot:
       if (debug) {
         Serial.println(F("Main: stopRoebot"));
@@ -334,6 +320,7 @@ void loop()
       //Set state to in EMC
       disableMotors();
       inState = stopped;
+      
       break;
 
     //Failure

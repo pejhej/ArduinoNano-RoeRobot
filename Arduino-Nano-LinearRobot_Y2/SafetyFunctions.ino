@@ -20,10 +20,7 @@
 
 
 void stopMotors() {
-  inState = stopped;
-  if (debug) {
-    Serial.println("stopped");
-  }
+  mainCommand = stopRoebot;
 }
 
 
