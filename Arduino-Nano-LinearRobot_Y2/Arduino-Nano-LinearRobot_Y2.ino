@@ -356,7 +356,6 @@ void loop()
       }
       inState = busy; // When in an opperation state is busy.
       ledDiscoShow();
-      mainCommand = idle;
       break;
     //-----------------
 
