@@ -19,20 +19,28 @@ int calculateQuotient(int X0, int X1, int Y0, int Y1, int Z0, int Z1) {
 }
 
 /** Calculates mm input to step output for given axis.
-
 */
 int MMToSteps(float millimeter, int axis) {
   int steps = 0;
   if (axis == X_AXIS) {
     steps = X_STEP_PER_MM * millimeter;
   } else if (axis == Y_AXIS) {
-    steps = X_STEP_PER_MM * millimeter;
+    steps = Y_STEP_PER_MM * millimeter;
   }
   return steps;
-
 }
 
-
+/** Calculates step input to mm output for given axis.
+*/
+float stepsToMM(int steps, int axis) {
+  float mm = 0;
+  if (axis == X_AXIS) {
+    mm = (steps / X_STEP_PER_MM) ;
+  } else if (axis == Y_AXIS) {
+    mm = (steps / Y_STEP_PER_MM);
+  }
+  return mm;
+}
 
 
 /******************************************************/

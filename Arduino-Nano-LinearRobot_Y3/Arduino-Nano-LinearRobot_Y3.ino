@@ -32,19 +32,15 @@ bool cal = false;
 
 /******** STEPPER SPESIFICATIONS ***********/
 #define DRIVER_MICROSTEPS_FACTOR  4 // Factor
-#define STEP_PER_REVOLUTION 200*DRIVER_MICROSTEPS_FACTOR
+#define STEP_PER_REVOLUTION 200
 #define BELT_PRESENT_PITCH 2//mm 
 #define X_PULLEY_TOOTH 20
 #define Y_PULLEY_TOOTH 16
 
 //Calculate step per mm
-#define X_STEP_PER_MM ((STEP_PER_REVOLUTION * DRIVER_MICROSTEPS_FACTOR) / (BELT_PRESENT_PITCH * X_PULLEY_TOOTH))
-#define Y_STEP_PER_MM ((STEP_PER_REVOLUTION * DRIVER_MICROSTEPS_FACTOR) / (BELT_PRESENT_PITCH * Y_PULLEY_TOOTH))
+#define X_STEP_PER_MM ((STEP_PER_REVOLUTION*DRIVER_MICROSTEPS_FACTOR) / (BELT_PRESENT_PITCH * X_PULLEY_TOOTH))
+#define Y_STEP_PER_MM ((STEP_PER_REVOLUTION*DRIVER_MICROSTEPS_FACTOR) / (BELT_PRESENT_PITCH * Y_PULLEY_TOOTH))
 
-//float XstepPerMM = stepsPerMM(STEP_PER_REVOLUTION, DRIVER_MICROSTEPS_FACTOR, BELT_PRESENT_PITCH, X_PULLEY_TOOTH);
-float YstepPerMM;
-float XMMPerStep;
-float YMMPerStep;
 
 /******** STOP INTERRUPT PIN ***********/
 #define INTERRUPT_PIN 2
@@ -75,8 +71,8 @@ int travelledDistance;
 
 //Structure to hold position
 typedef struct Pos {
-  short x;
-  short y;
+  int x;
+  int y;
 } Pos;
 
 Pos currentPos;
@@ -95,8 +91,8 @@ unsigned long interrupt_time = 0;
 
 
 //Set steppers
-Stepper motorX(STEP_PER_REVOLUTION, X_MOTOR_STEP, X_MOTOR_DIR);
-Stepper motorY(STEP_PER_REVOLUTION, Y_MOTOR_STEP, Y_MOTOR_DIR);
+Stepper motorX(STEP_PER_REVOLUTION * DRIVER_MICROSTEPS_FACTOR, X_MOTOR_STEP, X_MOTOR_DIR);
+Stepper motorY(STEP_PER_REVOLUTION * DRIVER_MICROSTEPS_FACTOR, Y_MOTOR_STEP, Y_MOTOR_DIR);
 
 //-------------------------------ENUMS------------------------------
 //ENUMS to keep track of what has been sent to the arduino, and what it should do.
@@ -189,8 +185,6 @@ void setup() {
   /******** ENABLE SIGNAL ***********/
   pinMode(MOTOR_ENABLE, OUTPUT);
 
-  Serial.println(X_STEP_PER_MM);
-
 
   /******** INTERRUPT PIN ***********/
   //Initialize the safety interrupts
@@ -214,7 +208,6 @@ void setup() {
 void loop()
 {
   receiveSerialEvent();
-
   //Switch command for the main loop
   //--------------------------------------------------------------------------------------------------
   switch (mainCommand)
@@ -224,7 +217,7 @@ void loop()
     case idle:
       inState = readyToRecieve;
       if (debug) {
-        // delay(10);
+        
         Serial.println(F("Main: Idle"));
       }
       inState = readyToRecieve;
