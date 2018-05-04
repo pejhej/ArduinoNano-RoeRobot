@@ -34,18 +34,11 @@ boolean robotInPosition()
  * Update the status to given status and notify over serial com
  */
 void updateStatusAndNotify(byte state) {
-  int readyCounter = 1;
-  if (inState != state) {
+
+  if (inState != state) 
+  {
     inState = state;
     sendInt(inState);
-    //Counter for making sure the controller updates the ready to recieve status - send it multiple times
-    if(state == readyToRecieve)
-    {
-      for(int i=0; i<readyCounter; ++i)
-      {
-        sendInt(inState);
-      }
-    }
   }
 }
 

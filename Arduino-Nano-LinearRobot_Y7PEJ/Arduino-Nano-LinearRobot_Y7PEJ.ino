@@ -153,7 +153,7 @@ enum command recieveCommand;    //Switch case command for the RECIEVE command, r
 
 void setup() {
 
-  Serial.begin(19200);
+  Serial.begin(115200);
 
   if (debug)
   {
@@ -219,8 +219,9 @@ void loop()
 
         Serial.println(F("Main: Idle"));
       }
-      
+      delay(10);
        updateStatusAndNotify(readyToRecieve);
+      // delay(5);
       //Enable motors
       disableMotors();
       //Set state to idle
@@ -279,7 +280,7 @@ void loop()
       if (debug) {
         Serial.println(F("Main: magnetOn"));
       }
-      //updateStatusAndNotify(busy);
+     // updateStatusAndNotify(busy);
       magnetON();
       mainCommand = idle;
       break;
